@@ -1,0 +1,27 @@
+services:
+  fast-embed:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fast-embed
+    restart: unless-stopped
+    ports:
+      - "11435:11435"
+    volumes:
+      - fast-embed-data:/app/data
+      - fast-embed-models:/app/models
+    environment:
+      - BIND_ADDRESS=0.0.0.0:11435
+      - LOG_LEVEL=info
+      - DEFAULT_EMBED_MODEL=nomic-embed-text-v1.5
+      - MODEL_CACHE_DIR=/app/models
+      - DB_PATH=/app/data/inference.db
+      - HF_TOKEN=${HF_TOKEN:-}
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+
+volumes:
+  fast-embed-data:
+  fast-embed-models:

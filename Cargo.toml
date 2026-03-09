@@ -1,0 +1,56 @@
+[package]
+name    = "fast-embed"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "fast-embed"
+path = "src/main.rs"
+
+# ── Servidor HTTP ──────────────────────────────────────────────
+[dependencies]
+axum              = { version = "0.7", features = ["macros"] }
+tower             = { version = "0.5", features = ["full"] }
+tower-http        = { version = "0.6", features = ["trace", "cors"] }
+tokio             = { version = "1",   features = ["full"] }
+
+# ── Serialización ───────────────────────────────────────────────
+serde             = { version = "1", features = ["derive"] }
+serde_json        = "1"
+
+# ── Inferencia (Candle) ─────────────────────────────────────────
+candle-core        = "0.8"
+candle-nn          = "0.8"
+hf-hub             = "0.4"
+tokenizers         = "0.21"
+
+# ── Base de datos ───────────────────────────────────────────────
+rusqlite          = { version = "0.31", features = ["bundled"] }
+r2d2              = "0.8"
+r2d2_sqlite       = "0.24"
+
+# ── Observabilidad ──────────────────────────────────────────────
+tracing           = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid              = { version = "1", features = ["v7"] }
+chrono            = { version = "0.4", features = ["serde"] }
+
+# ── Sistema / Hardware ──────────────────────────────────────────
+sysinfo           = "0.30"
+
+# ── Config ──────────────────────────────────────────────────────
+dotenvy           = "0.15"
+
+# ── Utilidades ──────────────────────────────────────────────────
+sha2              = "0.10"
+hex               = "0.4"
+rand              = "0.8"
+dashmap           = "6"
+anyhow            = "1"
+clap              = { version = "4", features = ["derive"] }
+
+# ── Features por plataforma ─────────────────────────────────────
+[features]
+default = []
+metal   = ["candle-core/metal", "candle-nn/metal"]
+cuda    = ["candle-core/cuda",  "candle-nn/cuda"]

@@ -1,0 +1,43 @@
+# ── Stage 1: Build with CUDA ──────────────────────────────────
+FROM rust:1.82-bookworm AS builder
+
+# CUDA dev headers (build only)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        nvidia-cuda-toolkit && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+COPY Cargo.toml Cargo.lock* ./
+RUN mkdir src && echo "fn main() {}" > src/main.rs && \
+    cargo build --release --features cuda 2>/dev/null || true && \
+    rm -rf src
+
+COPY src/ src/
+RUN cargo build --release --features cuda && \
+    strip target/release/fast-embed
+
+# ── Stage 2: Runtime with CUDA ────────────────────────────────
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    useradd -r -s /bin/false fast-embed
+
+WORKDIR /app
+
+COPY --from=builder /build/target/release/fast-embed /app/fast-embed
+
+RUN mkdir -p /app/data /app/models && chown -R fast-embed:fast-embed /app
+
+USER fast-embed
+
+EXPOSE 11435
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -sf http://localhost:11435/health || exit 1
+
+ENTRYPOINT ["/app/fast-embed"]
+CMD ["serve"]

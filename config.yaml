@@ -1,0 +1,10 @@
+server:
+  bind_address: "0.0.0.0:11435"
+  log_level: "info"
+
+models:
+  default_embed_model: "nomic-embed-text-v1.5"
+  cache_dir: "./models"
+
+database:
+  path: "./data/inference.db"
