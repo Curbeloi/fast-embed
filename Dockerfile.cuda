@@ -1,5 +1,5 @@
 # ── Stage 1: Build with CUDA ──────────────────────────────────
-FROM rust:1.82-bookworm AS builder
+FROM rust:1.85-bookworm AS builder
 
 # CUDA dev headers (build only)
 RUN apt-get update && \
@@ -15,7 +15,9 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs && \
     rm -rf src
 
 COPY src/ src/
-RUN cargo build --release --features cuda && \
+COPY migrations/ migrations/
+RUN rm -f target/release/fast-embed target/release/deps/fast_embed* && \
+    cargo build --release --features cuda && \
     strip target/release/fast-embed
 
 # ── Stage 2: Runtime with CUDA ────────────────────────────────

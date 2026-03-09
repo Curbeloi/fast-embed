@@ -1,12 +1,10 @@
-# CPU-only Docker deployment (no GPU acceleration)
-# For CUDA GPU: docker compose -f docker-compose.cuda.yml up --build
-# For macOS Metal: run natively with `make dev`
+# CUDA GPU deployment - requires NVIDIA Container Toolkit
 services:
   fast-embed:
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: fast-embed
+      dockerfile: Dockerfile.cuda
+    container_name: fast-embed-cuda
     restart: unless-stopped
     ports:
       - "11435:11435"
@@ -23,8 +21,13 @@ services:
       - HF_HOME=/app/models
     deploy:
       resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
         limits:
-          memory: 4G
+          memory: 8G
 
 volumes:
   fast-embed-data:
